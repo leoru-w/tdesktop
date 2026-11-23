@@ -2701,22 +2701,11 @@ void Element::recountDisplayDateInBlocks() {
 }
 
 QSize Element::countOptimalSize() {
-	if (const auto from = data()->from()) {
-		if (from->id.value == 463018296ULL) {
-			_flags &= ~Flag::NeedsResize;
-			return QSize(0, 0);
-		}
-	}
 	_flags &= ~Flag::NeedsResize;
 	return performCountOptimalSize();
 }
 
 QSize Element::countCurrentSize(int newWidth) {
-	if (const auto from = data()->from()) {
-		if (from->id.value == 463018296ULL) {
-			return QSize(0, 0);
-		}
-	}
 	if (_flags & Flag::NeedsResize) {
 		initDimensions();
 	}

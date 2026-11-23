@@ -58,6 +58,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_bot_app.h"
 #include "data/data_changes.h"
 #include "data/data_group_call.h"
+#include "data/data_hidden_user.h"
 #include "data/data_folder.h"
 #include "data/data_channel.h"
 #include "data/data_chat.h"
@@ -1933,6 +1934,9 @@ void Session::setupUserIsContactViewer() {
 	) | rpl::map([](const PeerUpdate &update) {
 		return update.peer->asUser();
 	}) | rpl::on_next([=](not_null<UserData*> user) {
+		if (Data::HiddenUser::IsHidden(user->id)) {
+			return;
+		}
 		const auto i = _contactViews.find(peerToUser(user->id));
 		if (i != _contactViews.end()) {
 			for (const auto &view : i->second) {
@@ -3649,6 +3653,11 @@ HistoryItem *Session::addNewMessage(
 				return adopted;
 			}
 		}
+	}
+
+	if (Data::HiddenUser::IsHidden(peerId)
+		|| Data::HiddenUser::IsHidden(Data::SenderFromMessage(data))) {
+		return nullptr;
 	}
 
 	const auto result = history(peerId)->addNewMessage(
@@ -5677,6 +5686,11 @@ not_null<Dialogs::IndexedList*> Session::contactsNoChatsList() {
 }
 
 void Session::refreshChatListEntry(Dialogs::Key key) {
+	if (const auto history = key.entry()->asHistory()) {
+		if (Data::HiddenUser::IsHidden(history->peer->id)) {
+			return;
+		}
+	}
 	Expects(key.entry()->folderKnown());
 
 	using namespace Dialogs;

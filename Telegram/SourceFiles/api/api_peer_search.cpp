@@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 #include "api/api_single_message_search.h"
 #include "apiwrap.h"
+#include "data/data_hidden_user.h"
 #include "data/data_session.h"
 #include "dialogs/ui/chat_search_in.h" // IsHashOrCashtagSearchQuery
 #include "main/main_session.h"
@@ -83,11 +84,17 @@ void PeerSearch::requestPeers() {
 		parsed.my.reserve(data.vmy_results().v.size());
 		for (const auto &id : data.vmy_results().v) {
 			const auto peerId = peerFromMTP(id);
+			if (Data::HiddenUser::IsHidden(peerId)) {
+				continue;
+			}
 			parsed.my.push_back(_session->data().peer(peerId));
 		}
 		parsed.peers.reserve(data.vresults().v.size());
 		for (const auto &id : data.vresults().v) {
 			const auto peerId = peerFromMTP(id);
+			if (Data::HiddenUser::IsHidden(peerId)) {
+				continue;
+			}
 			parsed.peers.push_back(_session->data().peer(peerId));
 		}
 		finishPeers(requestId, std::move(parsed));
@@ -113,6 +120,9 @@ void PeerSearch::requestSponsored() {
 			for (const auto &peer : data.vpeers().v) {
 				const auto &data = peer.data();
 				const auto peerId = peerFromMTP(data.vpeer());
+				if (Data::HiddenUser::IsHidden(peerId)) {
+					continue;
+				}
 				parsed.sponsored.push_back({
 					.peer = _session->data().peer(peerId),
 					.randomId = data.vrandom_id().v,

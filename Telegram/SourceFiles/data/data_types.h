@@ -114,6 +114,7 @@ using FilterId = int32;
 using MessageIdsList = std::vector<FullMsgId>;
 
 [[nodiscard]] PeerId PeerFromMessage(const MTPmessage &message);
+[[nodiscard]] PeerId SenderFromMessage(const MTPmessage &message);
 [[nodiscard]] MsgId IdFromMessage(const MTPmessage &message);
 [[nodiscard]] TimeId DateFromMessage(const MTPmessage &message);
 [[nodiscard]] BusinessShortcutId BusinessShortcutIdFromMessage(

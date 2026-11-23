@@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_saved_sublist.h"
 #include "data/data_session.h"
 #include "data/data_changes.h"
+#include "data/data_hidden_user.h"
 #include "data/data_channel.h"
 #include "data/data_forum_topic.h"
 #include "data/data_chat_filters.h"
@@ -200,6 +201,10 @@ void Proxy::addSlice(const MTPmessages_Messages &slice, int alreadyLoaded) {
 	const auto localFlags = MessageFlags();
 	const auto type = NewMessageType::Existing;
 	for (const auto &message : messages) {
+		if (Data::HiddenUser::IsHidden(Data::PeerFromMessage(message))
+			|| Data::HiddenUser::IsHidden(Data::SenderFromMessage(message))) {
+			continue;
+		}
 		const auto item = history->addNewMessage(
 			IdFromMessage(message),
 			message,

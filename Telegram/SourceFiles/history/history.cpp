@@ -37,6 +37,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_media_types.h"
 #include "data/data_channel_admins.h"
 #include "data/data_changes.h"
+#include "data/data_hidden_user.h"
 #include "data/data_chat_filters.h"
 #include "data/data_replies_list.h"
 #include "data/data_send_action.h"
@@ -650,6 +651,10 @@ std::vector<not_null<HistoryItem*>> History::createItems(
 	const auto detachExistingItem = true;
 	for (auto i = data.cend(), e = data.cbegin(); i != e;) {
 		const auto &data = *--i;
+		if (Data::HiddenUser::IsHidden(Data::PeerFromMessage(data))
+			|| Data::HiddenUser::IsHidden(Data::SenderFromMessage(data))) {
+			continue;
+		}
 		const auto id = IdFromMessage(data);
 		if ((id.bare == 1) && (data.type() == mtpc_messageEmpty)) {
 			// The first message of channels should be a service message

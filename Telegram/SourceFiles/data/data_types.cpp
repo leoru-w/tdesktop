@@ -124,6 +124,16 @@ PeerId PeerFromMessage(const MTPmessage &message) {
 	});
 }
 
+PeerId SenderFromMessage(const MTPmessage &message) {
+	return message.match([](const MTPDmessageEmpty &) {
+		return PeerId(0);
+	}, [](const auto &data) {
+		return data.vfrom_id()
+			? peerFromMTP(*data.vfrom_id())
+			: PeerId(0);
+	});
+}
+
 MsgId IdFromMessage(const MTPmessage &message) {
 	return message.match([](const auto &data) {
 		return data.vid().v;

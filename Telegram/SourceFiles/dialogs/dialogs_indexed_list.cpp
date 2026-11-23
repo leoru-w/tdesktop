@@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "dialogs/dialogs_indexed_list.h"
 
 #include "main/main_session.h"
+#include "data/data_hidden_user.h"
 #include "data/data_session.h"
 #include "history/history.h"
 
@@ -266,6 +267,11 @@ std::vector<not_null<Row*>> IndexedList::filtered(
 	}
 	result.reserve(minimal->size());
 	for (const auto &row : *minimal) {
+		if (const auto history = row->entry()->asHistory()) {
+			if (Data::HiddenUser::IsHidden(history->peer->id)) {
+				continue;
+			}
+		}
 		const auto &nameWords = row->entry()->chatListNameWords();
 		const auto found = [&](const QString &word) {
 			for (const auto &name : nameWords) {
